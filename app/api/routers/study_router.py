@@ -1,6 +1,5 @@
-from datetime import datetime  # CORRETO
+from datetime import datetime
 from fastapi import APIRouter
-
 from app.application.use_cases.get_day_history_usecase import GetDayHistoryUseCase
 from app.application.use_cases.get_day_overview_usecase import GetDayOverviewUseCase
 from app.application.use_cases.get_day_schedule_usecase import GetDayScheduleUseCase
@@ -50,7 +49,12 @@ async def history(user_id: str, date: str):
 @router.get("/schedule")
 async def schedule(user_id: str, date: str):
     date_obj = datetime.fromisoformat(date)
-    usecase = GetDayScheduleUseCase(RevisionRepositoryImpl())
+
+    usecase = GetDayScheduleUseCase(
+        revision_repo=RevisionRepositoryImpl(),
+        study_repo=StudyRepositoryImpl(),
+    )
+
     return await usecase.execute(user_id, date_obj)
 
 # SEMANA ATUAL

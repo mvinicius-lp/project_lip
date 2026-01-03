@@ -10,3 +10,6 @@ class StudyRepository(ABC):
 
     @abstractmethod
     async def find_by_date(self, user_id: str, date: datetime): pass
+
+    @abstractmethod
+    async def find_by_id(self, study_id: str): pass

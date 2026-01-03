@@ -1,4 +1,6 @@
 from datetime import datetime, timedelta
+
+from bson import ObjectId
 from app.core.database import db
 from app.utils.mongo_utils import convert_mongo_document, convert_mongo_list
 
@@ -32,3 +34,7 @@ class StudyRepositoryImpl:
 
         docs = await cursor.to_list(None)
         return convert_mongo_list(docs)
+    
+    async def find_by_id(self, study_id: str):
+        doc = await db[COLLECTION].find_one({"_id": ObjectId(study_id)})
+        return convert_mongo_document(doc)
