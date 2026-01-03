@@ -1,4 +1,10 @@
+from datetime import datetime  # CORRETO
 from fastapi import APIRouter
+
+from app.application.use_cases.get_day_history_usecase import GetDayHistoryUseCase
+from app.application.use_cases.get_day_overview_usecase import GetDayOverviewUseCase
+from app.application.use_cases.get_day_schedule_usecase import GetDayScheduleUseCase
+from app.application.use_cases.get_week_overview_usecase import GetWeekOverviewUseCase
 from app.infrastructure.mongodb.study_repository_impl import StudyRepositoryImpl
 from app.infrastructure.mongodb.revision_repository_impl import RevisionRepositoryImpl
 from app.application.use_cases.register_study_usecase import RegisterStudyUseCase
@@ -26,3 +32,29 @@ async def register_study(
         minutos=minutos,
         dificuldade=dificuldade
     )
+
+# VISÃO DE HOJE
+@router.get("/today")
+async def today(user_id: str):
+    usecase = GetDayOverviewUseCase(StudyRepositoryImpl(), RevisionRepositoryImpl())
+    return await usecase.execute(user_id)
+
+# HISTÓRICO (dia passado)
+@router.get("/history")
+async def history(user_id: str, date: str):
+    date_obj = datetime.fromisoformat(date)
+    usecase = GetDayHistoryUseCase(StudyRepositoryImpl(), RevisionRepositoryImpl())
+    return await usecase.execute(user_id, date_obj)
+
+# CRONOGRAMA (dia futuro)
+@router.get("/schedule")
+async def schedule(user_id: str, date: str):
+    date_obj = datetime.fromisoformat(date)
+    usecase = GetDayScheduleUseCase(RevisionRepositoryImpl())
+    return await usecase.execute(user_id, date_obj)
+
+# SEMANA ATUAL
+@router.get("/week")
+async def week(user_id: str):
+    usecase = GetWeekOverviewUseCase(StudyRepositoryImpl(), RevisionRepositoryImpl())
+    return await usecase.execute(user_id)
