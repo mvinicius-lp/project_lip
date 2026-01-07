@@ -35,6 +35,6 @@ class StudyRepositoryImpl:
         docs = await cursor.to_list(None)
         return convert_mongo_list(docs)
     
-    async def find_by_id(self, study_id: str):
-        doc = await db[COLLECTION].find_one({"_id": ObjectId(study_id)})
-        return convert_mongo_document(doc)
+    async def find_by_id(self, study_id):
+        study = await db[COLLECTION].find_one({"_id": ObjectId(study_id)})
+        return convert_mongo_document(study)

@@ -1,14 +1,24 @@
 from datetime import datetime
-from fastapi import APIRouter
+from fastapi import APIRouter, HTTPException
+from app.application.use_cases.get_completed_revisions_usecase import GetCompletedRevisionsUseCase
 from app.application.use_cases.get_day_history_usecase import GetDayHistoryUseCase
 from app.application.use_cases.get_day_overview_usecase import GetDayOverviewUseCase
 from app.application.use_cases.get_day_schedule_usecase import GetDayScheduleUseCase
 from app.application.use_cases.get_week_overview_usecase import GetWeekOverviewUseCase
+from app.application.use_cases.mark_completed_revision_usecase import MarkCompletedRevisionUseCase
 from app.infrastructure.mongodb.study_repository_impl import StudyRepositoryImpl
 from app.infrastructure.mongodb.revision_repository_impl import RevisionRepositoryImpl
 from app.application.use_cases.register_study_usecase import RegisterStudyUseCase
 
 router = APIRouter(prefix="/study", tags=["Estudos"])
+
+# Método auxiliar para converter o tempo de "1:20" para minutos
+def convert_time_to_minutes(tempo_dedicado: str):
+    try:
+        horas, minutos = map(int, tempo_dedicado.split(":"))
+        return horas * 60 + minutos
+    except ValueError:
+        raise ValueError("Tempo dedicado deve estar no formato 'HH:MM'")
 
 @router.post("/register")
 async def register_study(
@@ -32,11 +42,6 @@ async def register_study(
         dificuldade=dificuldade
     )
 
-# VISÃO DE HOJE
-@router.get("/today")
-async def today(user_id: str):
-    usecase = GetDayOverviewUseCase(StudyRepositoryImpl(), RevisionRepositoryImpl())
-    return await usecase.execute(user_id)
 
 # HISTÓRICO (dia passado)
 @router.get("/history")
@@ -62,3 +67,36 @@ async def schedule(user_id: str, date: str):
 async def week(user_id: str):
     usecase = GetWeekOverviewUseCase(StudyRepositoryImpl(), RevisionRepositoryImpl())
     return await usecase.execute(user_id)
+
+# VISÃO DE HOJE/A FAZER HOJE
+@router.get("/today")
+async def today(user_id: str):
+    usecase = GetDayOverviewUseCase(StudyRepositoryImpl(), RevisionRepositoryImpl())
+    return await usecase.execute(user_id)
+
+# Endpoint para marcar revisão como realizada
+@router.post("/mark_completed")
+async def mark_completed(revision_id: str, tempo_dedicado: str):
+    tempo_minutos = convert_time_to_minutes(tempo_dedicado)
+    usecase = MarkCompletedRevisionUseCase(RevisionRepositoryImpl())
+    return await usecase.execute(revision_id, tempo_minutos)
+
+# Endpoint para revisões concluídas
+@router.get("/completed")
+async def completed_revisions(user_id: str):
+    usecase = GetCompletedRevisionsUseCase(
+        RevisionRepositoryImpl(), StudyRepositoryImpl()
+    )
+    return await usecase.execute(user_id)
+
+# Endpoint para deletar uma revisão
+@router.delete("/revision/delete")
+async def delete_revision(revision_id: str):
+    revision_repo = RevisionRepositoryImpl()
+
+    success = await revision_repo.delete(revision_id)
+
+    if success:
+        return {"message": "Revisão deletada com sucesso!"}
+    else:
+        raise HTTPException(status_code=404, detail="Revisão não encontrada")

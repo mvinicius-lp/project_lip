@@ -16,5 +16,4 @@ class RevisionRepository(ABC):
     @abstractmethod
     async def find_past(self, user_id: str, date: datetime): pass
 
-    @abstractmethod
-    async def find_by_id(self, study_id: str): pass
+    
