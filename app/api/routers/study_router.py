@@ -4,6 +4,7 @@ from app.application.use_cases.get_completed_revisions_usecase import GetComplet
 from app.application.use_cases.get_day_history_usecase import GetDayHistoryUseCase
 from app.application.use_cases.get_day_overview_usecase import GetDayOverviewUseCase
 from app.application.use_cases.get_day_schedule_usecase import GetDayScheduleUseCase
+from app.application.use_cases.get_study_history_complete_usecase import GetStudyHistoryCompleteUseCase
 from app.application.use_cases.get_week_overview_usecase import GetWeekOverviewUseCase
 from app.application.use_cases.mark_completed_revision_usecase import MarkCompletedRevisionUseCase
 from app.infrastructure.mongodb.study_repository_impl import StudyRepositoryImpl
@@ -145,4 +146,14 @@ async def delete_revision(revision_id: str):
     else:
         raise HTTPException(status_code=404, detail="Revisão não encontrada")
     
+# Endpoint que tras o histórico de estudos completo
+@router.get("/history/complete")
+async def get_study_history(user_id: str):
+    """Retorna o histórico de estudos do usuário, incluindo tempo dedicado, disciplinas e tópicos estudados."""
+    
+    study_repo = StudyRepositoryImpl()
+    revision_repo = RevisionRepositoryImpl()
 
+    usecase = GetStudyHistoryCompleteUseCase(study_repo, revision_repo)
+
+    return await usecase.execute(user_id)

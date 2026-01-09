@@ -84,3 +84,9 @@ class RevisionRepositoryImpl:
         if result.deleted_count > 0:
             return True  
         return False  
+    
+    async def find_by_study_id(self, study_id: str):
+        """Encontra todas as revisões associadas a um estudo específico."""
+        cursor = db[COLLECTION].find({"study_id": study_id})
+        revisions = await cursor.to_list(None)
+        return convert_mongo_list(revisions)

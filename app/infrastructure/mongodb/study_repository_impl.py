@@ -54,3 +54,9 @@ class StudyRepositoryImpl:
         )
 
         return result.modified_count > 0
+    
+    async def find_by_user_id(self, user_id: str):
+        """Encontra todos os estudos de um usuário pelo user_id."""
+        cursor = db[COLLECTION].find({"user_id": user_id})
+        studies = await cursor.to_list(None)
+        return convert_mongo_list(studies)
