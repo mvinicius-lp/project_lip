@@ -10,6 +10,7 @@ from app.infrastructure.mongodb.study_repository_impl import StudyRepositoryImpl
 from app.infrastructure.mongodb.revision_repository_impl import RevisionRepositoryImpl
 from app.application.use_cases.register_study_usecase import RegisterStudyUseCase
 from app.application.use_cases.delete_study_usecase import DeleteStudyUseCase
+from app.application.use_cases.update_study_usecase import UpdateStudyUseCase
 
 router = APIRouter(prefix="/study", tags=["Estudos"])
 
@@ -42,6 +43,40 @@ async def register_study(
         minutos=minutos,
         dificuldade=dificuldade
     )
+
+#Atualiza um estudo
+@router.put("/update")
+async def update_study(
+    study_id: str,
+    disciplina: str = None,
+    conteudo: str = None,
+    horas: int = None,
+    minutos: int = None,
+    dificuldade: str = None
+):
+    study_repo = StudyRepositoryImpl()
+    
+    study_data = {}
+
+    if disciplina:
+        study_data["disciplina"] = disciplina
+    if conteudo:
+        study_data["conteudo"] = conteudo
+    if horas is not None:
+        study_data["tempo_horas"] = horas
+    if minutos is not None:
+        study_data["tempo_minutos"] = minutos
+    if dificuldade:
+        study_data["dificuldade"] = dificuldade
+
+    usecase = UpdateStudyUseCase(study_repo)
+
+    updated = await usecase.execute(study_id, study_data)
+
+    if updated:
+        return {"message": "Estudo atualizado com sucesso"}
+    else:
+        return {"message": "Falha ao atualizar o estudo"}, 400
 
 #Deleta um estudo
 @router.delete("/delete")

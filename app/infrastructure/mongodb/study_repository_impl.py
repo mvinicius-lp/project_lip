@@ -46,3 +46,11 @@ class StudyRepositoryImpl:
         result = await db[COLLECTION].delete_one({"_id": ObjectId(study_id)})
 
         return result.deleted_count > 0
+    
+    async def update(self, study_id: str, study_data: dict) -> bool:
+        result = await db[COLLECTION].update_one(
+            {"_id": ObjectId(study_id)},  
+            {"$set": study_data}  
+        )
+
+        return result.modified_count > 0
