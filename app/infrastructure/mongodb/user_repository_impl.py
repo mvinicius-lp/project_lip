@@ -1,3 +1,4 @@
+from bson import ObjectId
 from app.domain.repositories.user_repository import UserRepository
 from app.domain.entities.user import User
 from app.core.database import db
@@ -16,3 +17,11 @@ class UserRepositoryImpl(UserRepository):
 
     async def get_by_email(self, email: str):
         return await db[COLLECTION].find_one({"email": email})
+    
+    async def update(self, user_id: str, nome: str) -> bool:
+        result = await db[COLLECTION].update_one(
+            {"_id": ObjectId(user_id)},
+            {"$set": {"nome": nome}}  
+        )
+
+        return result.modified_count > 0
