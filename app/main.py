@@ -2,6 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.api.routers.user_router import router as user_router
 from app.api.routers.study_router import router as study_router
+from app.api.routers.discipline_router import router as discipline_router
 
 app = FastAPI(
     title="Projeto FastAPI - Trabalho de LIP",
@@ -18,3 +19,4 @@ app.add_middleware(
 
 app.include_router(user_router)
 app.include_router(study_router)
+app.include_router(discipline_router)
