@@ -7,3 +7,4 @@ python-dotenv
 motor
 passlib[bcrypt]
 email-validator==2.3.0
+reportlab==4.4.7
