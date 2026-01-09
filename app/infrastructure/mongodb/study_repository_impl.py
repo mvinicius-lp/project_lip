@@ -5,6 +5,7 @@ from app.core.database import db
 from app.utils.mongo_utils import convert_mongo_document, convert_mongo_list
 
 COLLECTION = "studies"
+REVISION_COLLECTION = "revisions"
 
 class StudyRepositoryImpl:
 
@@ -38,3 +39,10 @@ class StudyRepositoryImpl:
     async def find_by_id(self, study_id):
         study = await db[COLLECTION].find_one({"_id": ObjectId(study_id)})
         return convert_mongo_document(study)
+
+    async def delete(self, study_id: str) -> bool:
+        await db[REVISION_COLLECTION].delete_many({"study_id": study_id})
+
+        result = await db[COLLECTION].delete_one({"_id": ObjectId(study_id)})
+
+        return result.deleted_count > 0

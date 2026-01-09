@@ -9,6 +9,7 @@ from app.application.use_cases.mark_completed_revision_usecase import MarkComple
 from app.infrastructure.mongodb.study_repository_impl import StudyRepositoryImpl
 from app.infrastructure.mongodb.revision_repository_impl import RevisionRepositoryImpl
 from app.application.use_cases.register_study_usecase import RegisterStudyUseCase
+from app.application.use_cases.delete_study_usecase import DeleteStudyUseCase
 
 router = APIRouter(prefix="/study", tags=["Estudos"])
 
@@ -42,6 +43,14 @@ async def register_study(
         dificuldade=dificuldade
     )
 
+#Deleta um estudo
+@router.delete("/delete")
+async def delete_study(study_id: str):
+    usecase = DeleteStudyUseCase(
+        StudyRepositoryImpl()
+    )
+
+    return await usecase.execute(study_id)
 
 # HISTÓRICO (dia passado)
 @router.get("/history")
@@ -100,3 +109,5 @@ async def delete_revision(revision_id: str):
         return {"message": "Revisão deletada com sucesso!"}
     else:
         raise HTTPException(status_code=404, detail="Revisão não encontrada")
+    
+
